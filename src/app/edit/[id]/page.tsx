@@ -82,9 +82,9 @@ export default function EditGiftPage() {
                 setIsUploading(true);
                 finalImageUrl = await uploadToCloudinary(imageFile);
                 setImageUrl(finalImageUrl);
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error("Lỗi upload ảnh:", error);
-                alert(error.message || "Tải ảnh lên thất bại. Vui lòng thử lại!");
+                alert(error instanceof Error ? error.message : "Tải ảnh lên thất bại. Vui lòng thử lại!");
                 setIsUploading(false);
                 return;
             }

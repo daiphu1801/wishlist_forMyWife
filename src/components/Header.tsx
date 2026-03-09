@@ -17,19 +17,6 @@ function HeaderContent() {
     const statusFilter = searchParams.get('status') || "all";
     const priorityFilter = searchParams.get('priority') || "all";
 
-    // Debounce search query to URL
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            updateFilter('q', searchQuery);
-        }, 300);
-        return () => clearTimeout(handler);
-    }, [searchQuery]);
-
-    // Do not show the generic header in the admin dashboard layout
-    if (pathname && pathname.startsWith("/admin")) {
-        return null;
-    }
-
     const updateFilter = (key: string, value: string) => {
         const params = new URLSearchParams(searchParams.toString());
         if (value && value !== 'all') {
@@ -44,6 +31,19 @@ function HeaderContent() {
             router.replace(`/?${params.toString()}`, { scroll: false });
         }
     };
+
+    // Debounce search query to URL
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            updateFilter('q', searchQuery);
+        }, 300);
+        return () => clearTimeout(handler);
+    }, [searchQuery]);
+
+    // Do not show the generic header in the admin dashboard layout
+    if (pathname && pathname.startsWith("/admin")) {
+        return null;
+    }
 
     return (
         <div className="fixed top-0 left-0 right-0 z-50 flex flex-col items-center p-2 sm:p-4 pointer-events-none">
