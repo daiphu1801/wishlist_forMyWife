@@ -1,7 +1,7 @@
 "use client";
 
-import { m, LazyMotion, domAnimation } from "framer-motion";
-import { ArrowLeft, Save, Image as ImageIcon } from "lucide-react";
+import { m, LazyMotion, domAnimation, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Save, Image as ImageIcon, CheckCircle2, AlertCircle } from "lucide-react";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { convertToWebP, uploadToCloudinary } from "@/lib/upload";
@@ -13,6 +13,12 @@ export default function AddGiftPage() {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [isConverting, setIsConverting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+    const showToast = (type: "success" | "error", message: string) => {
+        setToast({ type, message });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     // Default form states
     const [giftName, setGiftName] = useState("");
@@ -64,7 +70,7 @@ export default function AddGiftPage() {
             setImageUrl(finalImageUrl); // Update state to Cloudinary URL
         } catch (error: unknown) {
             console.error("Lỗi upload ảnh:", error);
-            alert(error instanceof Error ? error.message : "Tải ảnh lên thất bại. Vui lòng thử lại!");
+            showToast("error", error instanceof Error ? error.message : "Tải ảnh lên thất bại. Vui lòng thử lại!");
             setIsUploading(false);
             return;
         }
@@ -81,14 +87,36 @@ export default function AddGiftPage() {
         setIsUploading(false);
 
         if (result.success) {
-            router.push("/");
+            showToast("success", `Đã thêm "${giftName.trim()}" vào danh sách! 🎀`);
+            setTimeout(() => router.push("/"), 1500);
         } else {
-            alert(result.error || "Có lỗi xảy ra, vui lòng thử lại!");
+            showToast("error", result.error || "Có lỗi xảy ra, vui lòng thử lại!");
         }
     };
 
     return (
         <LazyMotion features={domAnimation}>
+            {/* Toast notification */}
+            <AnimatePresence>
+                {toast && (
+                    <m.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className={`fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-xl text-sm font-medium ${
+                            toast.type === "success"
+                                ? "bg-white border border-green-100 text-green-700 shadow-green-100/50"
+                                : "bg-white border border-red-100 text-red-600 shadow-red-100/50"
+                        }`}
+                    >
+                        {toast.type === "success"
+                            ? <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
+                            : <AlertCircle className="h-5 w-5 text-red-500 shrink-0" />}
+                        {toast.message}
+                    </m.div>
+                )}
+            </AnimatePresence>
+
             <div className="relative min-h-screen overflow-hidden bg-slate-50 font-sans selection:bg-pink-200">
                 <div className="absolute inset-0 z-0 opacity-40">
                     <div className="absolute inset-0 bg-[radial-gradient(#ec4899_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_0%,#000_70%,transparent_100%)]"></div>
