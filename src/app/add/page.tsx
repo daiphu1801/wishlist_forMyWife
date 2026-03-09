@@ -48,7 +48,7 @@ export default function AddGiftPage() {
             setImageUrl(previewUrl);
         } catch (error) {
             console.error("Lỗi chuyển đổi ảnh:", error);
-            alert("Có lỗi xảy ra khi xử lý ảnh. Vui lòng thử lại!");
+            showToast("error", "Có lỗi xảy ra khi xử lý ảnh. Vui lòng thử lại!");
         } finally {
             setIsConverting(false);
         }
@@ -58,7 +58,7 @@ export default function AddGiftPage() {
         e.preventDefault();
 
         if (!imageFile) {
-            alert("Bạn chưa chọn ảnh món quà kìa 🥺");
+            showToast("error", "Bạn chưa chọn ảnh món quà kìa 🥺");
             return;
         }
 
