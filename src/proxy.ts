@@ -23,7 +23,7 @@ function verifySession(cookieValue: string): string | null {
     return mismatch === 0 ? role : null;
 }
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
     const session = req.cookies.get("session")?.value;
     const role = session ? verifySession(session) : null;
 
