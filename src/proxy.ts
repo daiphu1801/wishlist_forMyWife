@@ -23,9 +23,13 @@ function verifySession(cookieValue: string): string | null {
     return mismatch === 0 ? role : null;
 }
 
+// Routes chỉ dành riêng cho prince
+const PRINCE_ONLY = ["/admin", "/add", "/edit"];
+
 export function proxy(req: NextRequest) {
     const session = req.cookies.get("session")?.value;
     const role = session ? verifySession(session) : null;
+    const { pathname } = req.nextUrl;
 
     // Chưa đăng nhập → về trang login
     if (!role) {
@@ -33,7 +37,8 @@ export function proxy(req: NextRequest) {
     }
 
     // Chỉ prince mới được vào khu vực quản trị
-    if (role !== "prince") {
+    const isPrinceOnly = PRINCE_ONLY.some((p) => pathname.startsWith(p));
+    if (isPrinceOnly && role !== "prince") {
         return NextResponse.redirect(new URL("/", req.url));
     }
 
@@ -41,5 +46,5 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/admin/:path*", "/add", "/edit/:path*"],
+    matcher: ["/", "/gift/:path*", "/admin/:path*", "/add", "/edit/:path*"],
 };
