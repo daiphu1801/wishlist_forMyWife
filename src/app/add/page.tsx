@@ -5,6 +5,7 @@ import { ArrowLeft, Save, Image as ImageIcon } from "lucide-react";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { convertToWebP, uploadToCloudinary } from "@/lib/upload";
+import { createGift } from "@/actions/gift";
 
 export default function AddGiftPage() {
     const router = useRouter();
@@ -61,18 +62,29 @@ export default function AddGiftPage() {
             setIsUploading(true);
             finalImageUrl = await uploadToCloudinary(imageFile);
             setImageUrl(finalImageUrl); // Update state to Cloudinary URL
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Lỗi upload ảnh:", error);
-            alert(error.message || "Tải ảnh lên thất bại. Vui lòng thử lại!");
+            alert(error instanceof Error ? error.message : "Tải ảnh lên thất bại. Vui lòng thử lại!");
             setIsUploading(false);
             return;
         }
 
-        // TODO: Proceed to save to database with finalImageUrl
-        console.log("Saving gift with URL:", finalImageUrl);
-        alert("Upload thành công nha! Link ảnh: " + finalImageUrl);
+        const result = await createGift({
+            name: giftName.trim(),
+            price: parseInt(price) || 0,
+            imageUrl: finalImageUrl,
+            url: link.trim() || undefined,
+            priority,
+            notes: notes.trim() || undefined,
+        });
+
         setIsUploading(false);
-        router.push("/admin"); // For now, redirect to admin directly or go back
+
+        if (result.success) {
+            router.push("/");
+        } else {
+            alert(result.error || "Có lỗi xảy ra, vui lòng thử lại!");
+        }
     };
 
     return (
