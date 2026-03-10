@@ -60,7 +60,7 @@ export default function GiftDetailClient({ gift, role }: { gift: GiftData; role:
                             <ArrowLeft className="h-4 w-4" /> Quay lại
                         </button>
 
-                        {role === "prince" && (
+                        {(role === "prince" || role === "myfiance") && (
                             <Link
                                 href={`/edit/${gift.id}`}
                                 className="flex items-center gap-2 rounded-full border border-pink-200 bg-white/50 px-4 py-2 text-sm font-medium text-pink-600 shadow-sm backdrop-blur-md transition-colors hover:bg-pink-50 hover:text-pink-700"
@@ -88,11 +88,10 @@ export default function GiftDetailClient({ gift, role }: { gift: GiftData; role:
                             />
                             <div className="absolute left-4 top-4">
                                 <span
-                                    className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium shadow-sm backdrop-blur-md ${
-                                        gift.status === "bought"
-                                            ? "bg-green-100/90 text-green-700"
-                                            : "bg-pink-100/90 text-pink-700"
-                                    }`}
+                                    className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium shadow-sm backdrop-blur-md ${gift.status === "bought"
+                                        ? "bg-green-100/90 text-green-700"
+                                        : "bg-pink-100/90 text-pink-700"
+                                        }`}
                                 >
                                     {gift.status === "bought" ? (
                                         <>
@@ -153,7 +152,7 @@ export default function GiftDetailClient({ gift, role }: { gift: GiftData; role:
                                         Xem chổ mua <ExternalLink className="h-5 w-5" />
                                     </a>
                                 )}
-                                {gift.status === "wishing" && role === "prince" && (
+                                {gift.status === "wishing" && (role === "prince" || role === "myfiance") && (
                                     <button
                                         onClick={handleMarkBought}
                                         disabled={isPending}

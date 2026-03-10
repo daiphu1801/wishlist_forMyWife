@@ -6,15 +6,15 @@ import { sign } from "@/lib/session";
 
 export async function login(role: string, passcode: string) {
     const princePass = process.env.PRINCE_PASSCODE;
-    const princessPass = process.env.PRINCESS_PASSCODE;
+    const myfiancePass = process.env.MYFIANCE_PASSCODE;
 
-    if (!princePass || !princessPass) {
+    if (!princePass || !myfiancePass) {
         return { success: false, error: "Server chưa được cấu hình passcode" };
     }
 
     const valid =
         (role === "prince" && passcode === princePass) ||
-        (role === "princess" && passcode === princessPass);
+        (role === "myfiance" && passcode === myfiancePass);
 
     if (!valid) {
         return { success: false, error: "Mật mã không đúng rồi! Thử lại nhé 🥺" };

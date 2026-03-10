@@ -41,6 +41,11 @@ export async function getSessionRole(): Promise<string | null> {
     }
 }
 
+export async function requireAuth(): Promise<void> {
+    const role = await getSessionRole();
+    if (role !== "prince" && role !== "myfiance") throw new Error("Unauthorized");
+}
+
 export async function requirePrince(): Promise<void> {
     const role = await getSessionRole();
     if (role !== "prince") throw new Error("Unauthorized");

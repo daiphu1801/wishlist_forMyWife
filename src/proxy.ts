@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHmac } from "crypto";
 
-function verifySession(cookieValue: string): string | null {
+// Dùng Web Crypto API (tương thích Edge Runtime — không dùng Node.js crypto)
+async function verifySession(cookieValue: string): Promise<string | null> {
     const secret = process.env.SESSION_SECRET;
     if (!secret) return null;
 
@@ -12,10 +12,27 @@ function verifySession(cookieValue: string): string | null {
     const sig = cookieValue.slice(dotIndex + 1);
     if (!role || !sig) return null;
 
-    const expected = createHmac("sha256", secret).update(role).digest("hex");
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(secret);
+
+    const key = await crypto.subtle.importKey(
+        "raw",
+        keyData,
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"]
+    );
+
+    const signatureBuffer = await crypto.subtle.sign("HMAC", key, encoder.encode(role));
+
+    // Convert ArrayBuffer → hex string
+    const expected = Array.from(new Uint8Array(signatureBuffer))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+
+    if (expected.length !== sig.length) return null;
 
     // Constant-time comparison để tránh timing attack
-    if (expected.length !== sig.length) return null;
     let mismatch = 0;
     for (let i = 0; i < expected.length; i++) {
         mismatch |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
@@ -23,12 +40,12 @@ function verifySession(cookieValue: string): string | null {
     return mismatch === 0 ? role : null;
 }
 
-// Routes chỉ dành riêng cho prince
-const PRINCE_ONLY = ["/admin", "/add", "/edit"];
+// Routes chỉ dành riêng cho prince (admin)
+const PRINCE_ONLY = ["/admin"];
 
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
     const session = req.cookies.get("session")?.value;
-    const role = session ? verifySession(session) : null;
+    const role = session ? await verifySession(session) : null;
     const { pathname } = req.nextUrl;
 
     // Chưa đăng nhập → về trang login

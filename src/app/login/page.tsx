@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/actions/auth";
 
-type Role = "prince" | "princess" | null;
+type Role = "prince" | "myfiance" | null;
 
 export default function LoginPage() {
     const router = useRouter();
@@ -96,7 +96,7 @@ export default function LoginPage() {
                                 </button>
 
                                 <button
-                                    onClick={() => setSelectedRole("princess")}
+                                    onClick={() => setSelectedRole("myfiance")}
                                     className="group relative flex w-full items-center justify-between rounded-3xl border border-pink-100 bg-white/80 p-6 text-left shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-pink-300 hover:bg-pink-50/80 hover:shadow-xl hover:shadow-pink-200/50"
                                 >
                                     <div className="flex items-center gap-4">
@@ -104,7 +104,7 @@ export default function LoginPage() {
                                             <Heart className="h-7 w-7 text-white fill-current" />
                                         </div>
                                         <div>
-                                            <h2 className="text-xl font-fredoka text-pink-600">Công Chúa</h2>
+                                            <h2 className="text-xl font-fredoka text-pink-600">My fianceeeee:3</h2>
                                             <p className="text-sm text-slate-500">Là em bé mít của anh ạaaa</p>
                                         </div>
                                     </div>
@@ -133,7 +133,7 @@ export default function LoginPage() {
                                     <div className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold ${selectedRole === "prince" ? "bg-blue-100 text-blue-700" : "bg-pink-100 text-pink-700"
                                         }`}>
                                         {selectedRole === "prince" ? <Crown className="h-4 w-4" /> : <Heart className="h-4 w-4" />}
-                                        {selectedRole === "prince" ? "Hoàng Tử" : "Công Chúa"}
+                                        {selectedRole === "prince" ? "Hoàng Tử" : "Người Yêu"}
                                     </div>
                                 </div>
 
@@ -144,7 +144,7 @@ export default function LoginPage() {
                                     </div>
                                     <h2 className="text-2xl font-fredoka text-pink-600">Nhập Mật Mã</h2>
                                     <p className="mt-2 text-sm text-slate-500">
-                                        Vui lòng nhập mật mã bí mật của {selectedRole === "prince" ? "Hoàng Tử" : "Công Chúa"}
+                                        Vui lòng nhập mật mã bí mật của {selectedRole === "prince" ? "Hoàng Tử" : "Người Yêu"}
                                     </p>
                                 </div>
 
@@ -155,13 +155,12 @@ export default function LoginPage() {
                                             value={passcode}
                                             onChange={(e) => { setPasscode(e.target.value); setError(""); }}
                                             placeholder="••••••••"
-                                            className={`w-full rounded-2xl border-2 bg-white/80 px-5 py-4 text-center text-2xl font-bold tracking-[0.3em] outline-none transition-all placeholder:font-normal placeholder:tracking-normal focus:bg-white ${
-                                                error
-                                                    ? "border-red-300 text-red-600 focus:border-red-400 focus:shadow-lg focus:shadow-red-200/50"
-                                                    : selectedRole === "prince"
+                                            className={`w-full rounded-2xl border-2 bg-white/80 px-5 py-4 text-center text-2xl font-bold tracking-[0.3em] outline-none transition-all placeholder:font-normal placeholder:tracking-normal focus:bg-white ${error
+                                                ? "border-red-300 text-red-600 focus:border-red-400 focus:shadow-lg focus:shadow-red-200/50"
+                                                : selectedRole === "prince"
                                                     ? "border-blue-100 text-blue-700 focus:border-blue-400 focus:shadow-lg focus:shadow-blue-200/50"
                                                     : "border-pink-100 text-pink-700 focus:border-pink-400 focus:shadow-lg focus:shadow-pink-200/50"
-                                            }`}
+                                                }`}
                                             autoFocus
                                         />
                                         {error && (
@@ -172,11 +171,10 @@ export default function LoginPage() {
                                     <button
                                         type="submit"
                                         disabled={passcode.length < 4 || isSubmitting}
-                                        className={`group relative flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 font-bold text-white shadow-lg transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none ${
-                                            selectedRole === "prince"
-                                                ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:scale-[1.02] hover:shadow-blue-500/30"
-                                                : "bg-gradient-to-r from-pink-400 to-pink-500 hover:scale-[1.02] hover:shadow-pink-500/30"
-                                        }`}
+                                        className={`group relative flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 font-bold text-white shadow-lg transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none ${selectedRole === "prince"
+                                            ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:scale-[1.02] hover:shadow-blue-500/30"
+                                            : "bg-gradient-to-r from-pink-400 to-pink-500 hover:scale-[1.02] hover:shadow-pink-500/30"
+                                            }`}
                                     >
                                         {isSubmitting ? (
                                             <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />

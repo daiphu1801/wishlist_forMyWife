@@ -18,6 +18,6 @@ export default async function GiftDetailPage({ params }: { params: Promise<{ id:
         updatedAt: result.gift.updatedAt.toISOString(),
     };
 
-    return <GiftDetailClient gift={gift} role={role ?? "princess"} />;
+    return <GiftDetailClient gift={gift} role={role ?? "myfiance"} />;
 }
 

@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { requirePrince } from "@/lib/session";
+import { requireAuth } from "@/lib/session";
 import { deleteFromCloudinary } from "@/lib/cloudinary";
 
 //  Validation helpers 
@@ -44,7 +44,7 @@ export async function createGift(data: {
     priority: string;
     notes?: string;
 }) {
-    await requirePrince();
+    await requireAuth();
 
     const validationError = validateGiftData(data);
     if (validationError) return { success: false, error: validationError };
@@ -101,7 +101,7 @@ export async function updateGift(id: string, data: {
     priority: string;
     notes?: string;
 }) {
-    await requirePrince();
+    await requireAuth();
 
     const validationError = validateGiftData(data);
     if (validationError) return { success: false, error: validationError };
@@ -137,7 +137,7 @@ export async function updateGift(id: string, data: {
 }
 
 export async function updateGiftStatus(id: string, status: "wishing" | "bought") {
-    await requirePrince();
+    await requireAuth();
 
     if (!VALID_STATUSES.includes(status)) {
         return { success: false, error: "Trang thai khong hop le" };
@@ -158,7 +158,7 @@ export async function updateGiftStatus(id: string, status: "wishing" | "bought")
 }
 
 export async function deleteGift(id: string) {
-    await requirePrince();
+    await requireAuth();
 
     try {
         const existing = await prisma.gift.findUnique({ where: { id }, select: { imageUrl: true } });
@@ -179,7 +179,7 @@ export async function deleteGift(id: string) {
 }
 
 export async function getAdminStats() {
-    await requirePrince();
+    await requireAuth();
 
     try {
         const [totalWishes, totalBought, totalPrice] = await Promise.all([
