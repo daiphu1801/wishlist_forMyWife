@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ExternalLink, Trash2, Edit2, Gift } from "lucide-react";
+import { Heart, ExternalLink, Trash2, Edit2, Gift, CheckCircle2 } from "lucide-react";
 import { m } from "framer-motion";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { deleteGift, updateGiftStatus } from "@/actions/gift";
 
 export type GiftItem = {
     id: string;
@@ -21,6 +24,10 @@ interface GiftCardProps {
 }
 
 export default function GiftCard({ gift }: GiftCardProps) {
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
+    const [deleteTarget, setDeleteTarget] = useState(false);
+
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat("vi-VN", {
             style: "currency",
@@ -28,13 +35,30 @@ export default function GiftCard({ gift }: GiftCardProps) {
         }).format(price);
     };
 
+    const handleDeleteConfirm = () => {
+        setDeleteTarget(false);
+        startTransition(async () => {
+            await deleteGift(gift.id);
+            router.refresh();
+        });
+    };
+
+    const handleStatusToggle = () => {
+        const next = gift.status === "wishing" ? "bought" : "wishing";
+        startTransition(async () => {
+            await updateGiftStatus(gift.id, next);
+            router.refresh();
+        });
+    };
+
     return (
+        <>
         <m.div
             variants={{
                 hidden: { opacity: 0, y: 20 },
                 visible: { opacity: 1, y: 0 },
             }}
-            className="group relative flex flex-row sm:flex-col overflow-hidden rounded-3xl sm:rounded-[2rem] border border-pink-100 bg-white/90 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-pink-200"
+            className={`group relative flex flex-row sm:flex-col overflow-hidden rounded-3xl sm:rounded-[2rem] border border-pink-100 bg-white/90 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-pink-200 ${isPending ? "opacity-60 pointer-events-none" : ""}`}
         >
             {/* Image Container - Square on Mobile, Portrait on Desktop */}
             <div className="relative aspect-square sm:aspect-[4/5] w-32 sm:w-full shrink-0 overflow-hidden bg-pink-50">
@@ -81,7 +105,7 @@ export default function GiftCard({ gift }: GiftCardProps) {
                     >
                         <Edit2 className="h-4 w-4" />
                     </Link>
-                    <button className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm hover:text-red-500">
+                    <button onClick={() => setDeleteTarget(true)} className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm hover:text-red-500 cursor-pointer">
                         <Trash2 className="h-4 w-4" />
                     </button>
                 </div>
@@ -130,20 +154,35 @@ export default function GiftCard({ gift }: GiftCardProps) {
                                 Link mua <ExternalLink className="h-3.5 w-3.5" />
                             </a>
                         )}
-                        {gift.status === "wishing" && (
-                            <button
-                                title="Đánh dấu đã mua"
-                                className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-pink-500 text-white shadow-md transition-colors hover:bg-pink-600"
-                            >
+                        <button
+                            onClick={handleStatusToggle}
+                            title={gift.status === "wishing" ? "Chốt đơn" : "Hoàn tác - chưa mua"}
+                            className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full shadow-md transition-colors cursor-pointer ${
+                                gift.status === "bought"
+                                    ? "bg-green-100 text-green-600 hover:bg-green-200"
+                                    : "bg-pink-500 text-white hover:bg-pink-600"
+                            }`}
+                        >
+                            {gift.status === "bought" ? (
+                                <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            ) : (
                                 <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            </button>
-                        )}
+                            )}
+                        </button>
 
                         {/* Mobile Action Buttons */}
                         <div className="flex items-center gap-1 sm:hidden">
+                            <Link
+                                href={`/edit/${gift.id}`}
+                                title="Chỉnh sửa"
+                                className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-400 hover:bg-blue-100 shrink-0"
+                            >
+                                <Edit2 className="h-3.5 w-3.5" />
+                            </Link>
                             <button
                                 title="Xóa món quà"
-                                className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-400 hover:bg-red-100 shrink-0"
+                                onClick={() => setDeleteTarget(true)}
+                                className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-400 hover:bg-red-100 shrink-0 cursor-pointer"
                             >
                                 <Trash2 className="h-4 w-4" />
                             </button>
@@ -158,5 +197,36 @@ export default function GiftCard({ gift }: GiftCardProps) {
                 </div>
             </div>
         </m.div>
+
+        {/* Custom Delete Confirmation Dialog */}
+        {deleteTarget && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setDeleteTarget(false)} />
+                <div className="relative bg-white rounded-3xl shadow-xl p-6 w-full max-w-sm mx-auto flex flex-col gap-4">
+                    <div className="text-center">
+                        <div className="text-4xl mb-2">🗑️</div>
+                        <h3 className="text-lg font-fredoka text-slate-800">Xóa món quà này?</h3>
+                        <p className="text-sm text-slate-500 mt-1">
+                            <span className="font-semibold text-slate-700">&quot;{gift.name}&quot;</span> sẽ bị xóa khỏi danh sách. Không thể hoàn tác nhé!
+                        </p>
+                    </div>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => setDeleteTarget(false)}
+                            className="flex-1 py-2.5 rounded-full border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-colors cursor-pointer"
+                        >
+                            Thôi
+                        </button>
+                        <button
+                            onClick={handleDeleteConfirm}
+                            className="flex-1 py-2.5 rounded-full bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition-colors shadow-md shadow-red-100 cursor-pointer"
+                        >
+                            Xóa luôn
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 }

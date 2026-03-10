@@ -27,6 +27,7 @@ export default function AdminGiftsClient({ gifts }: { gifts: GiftItem[] }) {
     const [statusFilter, setStatusFilter] = useState("all");
     const [priorityFilter, setPriorityFilter] = useState("all");
     const [currentPage, setCurrentPage] = useState(1);
+    const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
     const ITEMS_PER_PAGE = 5;
 
     const formatPrice = (price: number) => {
@@ -59,7 +60,13 @@ export default function AdminGiftsClient({ gifts }: { gifts: GiftItem[] }) {
     };
 
     const handleDelete = (id: string, name: string) => {
-        if (!confirm(`Xóa "${name}" khỏi danh sách? Không thể hoàn tác nhé!`)) return;
+        setDeleteTarget({ id, name });
+    };
+
+    const handleDeleteConfirm = () => {
+        if (!deleteTarget) return;
+        const { id } = deleteTarget;
+        setDeleteTarget(null);
         startTransition(async () => {
             await deleteGift(id);
             router.refresh();
@@ -67,6 +74,7 @@ export default function AdminGiftsClient({ gifts }: { gifts: GiftItem[] }) {
     };
 
     return (
+        <>
         <div className="max-w-6xl w-full mx-auto space-y-6 sm:space-y-8">
 
             {/* Header Section */}
@@ -292,5 +300,45 @@ export default function AdminGiftsClient({ gifts }: { gifts: GiftItem[] }) {
                 )}
             </div>
         </div>
+
+        {/* FAB - Thêm quà mới (Mobile Only) */}
+        <Link
+            href="/add"
+            className="sm:hidden fixed bottom-[4.5rem] right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-pink-400 to-pink-500 text-white shadow-lg shadow-pink-300 active:scale-95 transition-transform"
+            title="Thêm quà mới"
+        >
+            <span className="text-3xl font-light leading-none mb-0.5">+</span>
+        </Link>
+
+        {/* Custom Delete Confirmation Dialog */}
+        {deleteTarget && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setDeleteTarget(null)} />
+                <div className="relative bg-white rounded-3xl shadow-xl p-6 w-full max-w-sm mx-auto flex flex-col gap-4">
+                    <div className="text-center">
+                        <div className="text-4xl mb-2">🗑️</div>
+                        <h3 className="text-lg font-fredoka text-slate-800">Xóa món quà này?</h3>
+                        <p className="text-sm text-slate-500 mt-1">
+                            <span className="font-semibold text-slate-700">&quot;{deleteTarget.name}&quot;</span> sẽ bị xóa khỏi danh sách. Không thể hoàn tác nhé!
+                        </p>
+                    </div>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => setDeleteTarget(null)}
+                            className="flex-1 py-2.5 rounded-full border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-colors cursor-pointer"
+                        >
+                            Thôi
+                        </button>
+                        <button
+                            onClick={handleDeleteConfirm}
+                            className="flex-1 py-2.5 rounded-full bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition-colors shadow-md shadow-red-100 cursor-pointer"
+                        >
+                            Xóa luôn
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 }

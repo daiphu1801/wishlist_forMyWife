@@ -95,11 +95,9 @@ function WishlistContent({ gifts }: { gifts: GiftItem[] }) {
                   ? "Thành quả thu hoạch 🛍️"
                   : "Danh sách muốn mua 🎀"}
               </h2>
-              <Link href="/add">
-                <div className="hidden sm:flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full border border-pink-200 text-pink-600 hover:bg-pink-50 font-medium cursor-pointer transition-colors shadow-sm bg-white/50 backdrop-blur-sm">
-                  <PlusCircle className="h-4 w-4" />
-                  <span className="text-sm">Gợi ý quà mới</span>
-                </div>
+              <Link href="/add" className="hidden sm:flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full border border-pink-200 text-pink-600 hover:bg-pink-50 font-medium cursor-pointer transition-colors shadow-sm bg-white/50 backdrop-blur-sm">
+                <PlusCircle className="h-4 w-4" />
+                <span className="text-sm">Gợi ý quà mới</span>
               </Link>
             </div>
 
@@ -145,6 +143,15 @@ function WishlistContent({ gifts }: { gifts: GiftItem[] }) {
             )}
           </div>
         </main>
+
+        {/* FAB - Gợi ý quà mới (Mobile Only) */}
+        <Link
+          href="/add"
+          className="sm:hidden fixed bottom-6 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-pink-400 to-pink-500 text-white shadow-lg shadow-pink-300 active:scale-95 transition-transform"
+          title="Gợi ý quà mới"
+        >
+          <span className="text-3xl font-light leading-none mb-0.5">+</span>
+        </Link>
       </div>
     </LazyMotion>
   );
