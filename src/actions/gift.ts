@@ -1,7 +1,7 @@
-﻿"use server";
+"use server";
 
 import prisma from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { requireAuth } from "@/lib/session";
 import { deleteFromCloudinary } from "@/lib/cloudinary";
 
@@ -70,11 +70,20 @@ export async function createGift(data: {
     }
 }
 
-export async function getGifts() {
-    try {
+const getCachedGifts = unstable_cache(
+    async () => {
         const gifts = await prisma.gift.findMany({
             orderBy: { createdAt: "desc" }
         });
+        return gifts;
+    },
+    ["gifts-list"],
+    { revalidate: 60, tags: ["gifts"] }
+);
+
+export async function getGifts() {
+    try {
+        const gifts = await getCachedGifts();
         return { success: true, gifts };
     } catch (error) {
         console.error("Error fetching gifts:", error);

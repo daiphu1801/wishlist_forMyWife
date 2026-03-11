@@ -8,8 +8,8 @@ export default async function AdminGiftsPage() {
               ...g,
               url: g.url ?? undefined,
               notes: g.notes ?? undefined,
-              createdAt: g.createdAt.toISOString(),
-              updatedAt: g.updatedAt.toISOString(),
+              createdAt: new Date(g.createdAt).toISOString(),
+              updatedAt: new Date(g.updatedAt).toISOString(),
           }))
         : [];
 

@@ -35,18 +35,10 @@ function WishlistContent({ gifts }: { gifts: GiftItem[] }) {
           <div className="absolute inset-0 bg-[radial-gradient(#ec4899_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_0%,#000_70%,transparent_100%)]"></div>
         </div>
 
-        {/* Decorative Blobs */}
+        {/* Decorative Blobs - CSS animation thay vì Framer Motion để nhẹ hơn trên mobile */}
         <div className="absolute overflow-hidden inset-0 pointer-events-none z-0">
-          <m.div
-            animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -left-[10%] -top-[10%] h-[40rem] w-[40rem] rounded-full bg-pink-200 blur-3xl filter"
-          />
-          <m.div
-            animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute -right-[10%] top-[20%] h-[35rem] w-[35rem] rounded-full bg-rose-200 blur-3xl filter"
-          />
+          <div className="blob-pink absolute -left-[10%] -top-[10%] h-[40rem] w-[40rem] rounded-full bg-pink-200 blur-3xl filter" />
+          <div className="blob-rose absolute -right-[10%] top-[20%] h-[35rem] w-[35rem] rounded-full bg-rose-200 blur-3xl filter" style={{ animationDelay: "1s" }} />
         </div>
 
         <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
@@ -105,12 +97,12 @@ function WishlistContent({ gifts }: { gifts: GiftItem[] }) {
               <m.div
                 initial="hidden"
                 animate="visible"
-                variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+                variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
               >
-                {filteredGifts.map((gift) => (
+                {filteredGifts.map((gift, index) => (
                   <div key={gift.id} className="break-inside-avoid w-full">
-                    <GiftCard gift={gift} />
+                    <GiftCard gift={gift} priority={index < 4} />
                   </div>
                 ))}
               </m.div>

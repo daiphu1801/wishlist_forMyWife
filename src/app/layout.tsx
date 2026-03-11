@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Fredoka } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
+import AppLoader from "@/components/AppLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,6 +47,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${fredoka.variable} antialiased`}
       >
+        <AppLoader />
         <Header />
         {children}
         <Script

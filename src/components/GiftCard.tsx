@@ -21,9 +21,10 @@ export type GiftItem = {
 
 interface GiftCardProps {
     gift: GiftItem;
+    priority?: boolean;
 }
 
-export default function GiftCard({ gift }: GiftCardProps) {
+export default function GiftCard({ gift, priority = false }: GiftCardProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [deleteTarget, setDeleteTarget] = useState(false);
@@ -67,6 +68,7 @@ export default function GiftCard({ gift }: GiftCardProps) {
                     alt={gift.name}
                     fill
                     sizes="(max-width: 640px) 128px, (max-width: 1024px) 50vw, 33vw"
+                    priority={priority}
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
 
