@@ -78,7 +78,7 @@ const getCachedGifts = unstable_cache(
         return gifts;
     },
     ["gifts-list"],
-    { revalidate: 60, tags: ["gifts"] }
+    { revalidate: 30 }
 );
 
 export async function getGifts() {

@@ -16,7 +16,7 @@ export default function EditGiftPage() {
     const [imageUrl, setImageUrl] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [isConverting, setIsConverting] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
     const showToast = (type: "success" | "error", message: string) => {
@@ -81,17 +81,17 @@ export default function EditGiftPage() {
         e.preventDefault();
 
         let finalImageUrl = imageUrl;
+        setIsSubmitting(true);
 
         // Only upload if the user selected a new file
         if (imageFile) {
             try {
-                setIsUploading(true);
                 finalImageUrl = await uploadToCloudinary(imageFile);
                 setImageUrl(finalImageUrl);
             } catch (error: unknown) {
                 console.error("Lỗi upload ảnh:", error);
                 showToast("error", error instanceof Error ? error.message : "Tải ảnh lên thất bại. Vui lòng thử lại!");
-                setIsUploading(false);
+                setIsSubmitting(false);
                 return;
             }
         }
@@ -105,7 +105,7 @@ export default function EditGiftPage() {
             notes: notes || undefined,
         });
 
-        setIsUploading(false);
+        setIsSubmitting(false);
 
         if (result.success) {
             showToast("success", "Cập nhật thành công! 🎀");
@@ -274,7 +274,7 @@ export default function EditGiftPage() {
                             <div className="flex flex-col gap-2">
                                 <label className="text-sm font-medium text-slate-700">Link Chỗ Bán Mua Nè 🛒</label>
                                 <input
-                                    type="url"
+                                    type="text"
                                     value={link}
                                     onChange={(e) => setLink(e.target.value)}
                                     placeholder="Link Shopee, Tiktok, Facebook..."
@@ -297,15 +297,15 @@ export default function EditGiftPage() {
                             <div className="mt-4 flex justify-end">
                                 <button
                                     type="submit"
-                                    disabled={isUploading}
+                                    disabled={isSubmitting}
                                     className="flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-400 to-pink-500 px-8 py-3.5 font-semibold text-white shadow-lg shadow-pink-500/30 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-pink-500/40 disabled:opacity-70 disabled:hover:translate-y-0"
                                 >
-                                    {isUploading ? (
+                                    {isSubmitting ? (
                                         <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
                                     ) : (
                                         <Save className="h-5 w-5" />
                                     )}
-                                    {isUploading ? "Đang đẩy ảnh lên mây..." : "Cập Nhật Lại Cho Chuẩn"}
+                                    {isSubmitting ? "Đang xử lý..." : "Cập Nhật Lại Cho Chuẩn"}
                                 </button>
                             </div>
                         </form>
