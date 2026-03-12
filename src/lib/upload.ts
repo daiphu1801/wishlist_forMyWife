@@ -1,79 +1,31 @@
-/** Kích thước tối đa (px) - ảnh lớn hơn sẽ bị thu nhỏ trước khi đưa lên Canvas */
-const MAX_DIMENSION = 1200;
-/** Timeout tối đa cho quá trình convert (ms) */
-const CONVERT_TIMEOUT_MS = 15_000;
+import imageCompression from 'browser-image-compression';
 
 /**
- * Converts any browser-supported image file to WebP format using Canvas.
+ * Converts any browser-supported image file to WebP format using `browser-image-compression`.
  *
- * Dùng createObjectURL thay vì readAsDataURL:
- * - readAsDataURL: copy TOÀN BỘ file vào RAM dưới dạng base64 (x1.37 kích thước)
- *   → iOS Safari kill tab khi file lớn (iPhone 14 Pro Max)
- * - createObjectURL: chỉ tạo pointer đến file, KHÔNG copy vào RAM → an toàn hơn
+ * This safely handles large images (e.g. 48MP from iPhone 14 Pro Max) by using Web Workers
+ * and an efficient resizing algorithm, preventing memory spikes and tab crashes on iOS Safari.
  */
-export const convertToWebP = (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-        const objectUrl = URL.createObjectURL(file);
-
-        const timer = setTimeout(() => {
-            URL.revokeObjectURL(objectUrl);
-            reject(new Error("Xử lý ảnh quá lâu, vui lòng thử ảnh nhỏ hơn!"));
-        }, CONVERT_TIMEOUT_MS);
-
-        const img = new Image();
-
-        img.onload = () => {
-            // Giải phóng bộ nhớ ngay sau khi ảnh đã load vào img element
-            URL.revokeObjectURL(objectUrl);
-
-            // Tính kích thước mới, giữ tỉ lệ ảnh
-            let { width, height } = img;
-            if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-                if (width >= height) {
-                    height = Math.round((height / width) * MAX_DIMENSION);
-                    width = MAX_DIMENSION;
-                } else {
-                    width = Math.round((width / height) * MAX_DIMENSION);
-                    height = MAX_DIMENSION;
-                }
-            }
-
-            const canvas = document.createElement("canvas");
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext("2d");
-
-            if (!ctx) {
-                clearTimeout(timer);
-                reject(new Error("Failed to get canvas context"));
-                return;
-            }
-
-            ctx.drawImage(img, 0, 0, width, height);
-
-            canvas.toBlob(
-                (blob) => {
-                    clearTimeout(timer);
-                    if (blob) {
-                        const baseName = file.name.replace(/\.[^/.]+$/, "");
-                        resolve(new File([blob], `${baseName}.webp`, { type: "image/webp" }));
-                    } else {
-                        reject(new Error("Không thể chuyển đổi ảnh, vui lòng thử lại!"));
-                    }
-                },
-                "image/webp",
-                0.82
-            );
+export const convertToWebP = async (file: File): Promise<File> => {
+    try {
+        const options = {
+            maxSizeMB: 1, // Optional: Target max size in MB, you can adjust this
+            maxWidthOrHeight: 1200, // Kích thước tối đa (px) - ảnh lớn hơn sẽ bị thu nhỏ
+            useWebWorker: true, // Use web worker for better performance and to avoid freezing UI
+            fileType: 'image/webp', // Target format
+            initialQuality: 0.82,
         };
 
-        img.onerror = () => {
-            clearTimeout(timer);
-            URL.revokeObjectURL(objectUrl);
-            reject(new Error("Không đọc được file ảnh này!"));
-        };
-
-        img.src = objectUrl;
-    });
+        const compressedBlob = await imageCompression(file, options);
+        
+        // Convert Blob back to File preserving original name but changing extension to webp
+        const baseName = file.name.replace(/\.[^/.]+$/, "");
+        return new File([compressedBlob], `${baseName}.webp`, { type: "image/webp" });
+        
+    } catch (error) {
+        console.error("Image compression error:", error);
+        throw new Error("Không thể xử lý ảnh, vui lòng thử lại ảnh khác!");
+    }
 };
 
 /**
