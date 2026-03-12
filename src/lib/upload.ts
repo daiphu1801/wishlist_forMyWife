@@ -9,22 +9,22 @@ import imageCompression from 'browser-image-compression';
 export const convertToWebP = async (file: File): Promise<File> => {
     try {
         const options = {
-            maxSizeMB: 1, // Optional: Target max size in MB, you can adjust this
-            maxWidthOrHeight: 1200, // Kích thước tối đa (px) - ảnh lớn hơn sẽ bị thu nhỏ
-            useWebWorker: true, // Use web worker for better performance and to avoid freezing UI
-            fileType: 'image/webp', // Target format
-            initialQuality: 0.82,
+            maxSizeMB: 1, // Kích thước tối đa 1MB
+            maxWidthOrHeight: 1024, // Thu gọn hơn một chút để đỡ ngốn RAM (1024 thay vì 1200)
+            useWebWorker: false, // TẮT Web Worker vì Safari iOS cấp rất ít RAM cho worker, dễ làm tab bị crash
+            fileType: 'image/jpeg', // Lưu ý: dùng jpeg encode nhanh hơn WebP và tốn ít RAM hơn trên iPhone
+            initialQuality: 0.8,
         };
 
         const compressedBlob = await imageCompression(file, options);
         
-        // Convert Blob back to File preserving original name but changing extension to webp
+        // Convert Blob back to File preserving original name but changing extension to jpg
         const baseName = file.name.replace(/\.[^/.]+$/, "");
-        return new File([compressedBlob], `${baseName}.webp`, { type: "image/webp" });
+        return new File([compressedBlob], `${baseName}.jpg`, { type: "image/jpeg" });
         
     } catch (error) {
         console.error("Image compression error:", error);
-        throw new Error("Không thể xử lý ảnh, vui lòng thử lại ảnh khác!");
+        throw new Error("Không thể xử lý ảnh quá lớn, vui lòng thử ảnh khác!");
     }
 };
 
