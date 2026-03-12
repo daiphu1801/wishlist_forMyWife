@@ -44,12 +44,12 @@ export async function createGift(data: {
     priority: string;
     notes?: string;
 }) {
-    await requireAuth();
-
     const validationError = validateGiftData(data);
     if (validationError) return { success: false, error: validationError };
 
     try {
+        await requireAuth();
+
         const gift = await prisma.gift.create({
             data: {
                 name: data.name.trim(),
@@ -65,6 +65,9 @@ export async function createGift(data: {
         revalidatePath("/admin");
         return { success: true, gift };
     } catch (error) {
+        if (error instanceof Error && error.message === "Unauthorized") {
+            return { success: false, error: "Bạn cần đăng nhập lại để thực hiện tác vụ này!" };
+        }
         console.error("Error creating gift:", error);
         return { success: false, error: "Failed to create gift" };
     }
@@ -110,12 +113,12 @@ export async function updateGift(id: string, data: {
     priority: string;
     notes?: string;
 }) {
-    await requireAuth();
-
     const validationError = validateGiftData(data);
     if (validationError) return { success: false, error: validationError };
 
     try {
+        await requireAuth();
+
         const existing = await prisma.gift.findUnique({ where: { id }, select: { imageUrl: true } });
 
         const gift = await prisma.gift.update({
@@ -140,19 +143,22 @@ export async function updateGift(id: string, data: {
         revalidatePath(`/edit/${id}`);
         return { success: true, gift };
     } catch (error) {
+        if (error instanceof Error && error.message === "Unauthorized") {
+            return { success: false, error: "Bạn cần đăng nhập lại để thực hiện tác vụ này!" };
+        }
         console.error("Error updating gift:", error);
         return { success: false, error: "Failed to update gift" };
     }
 }
 
 export async function updateGiftStatus(id: string, status: "wishing" | "bought") {
-    await requireAuth();
-
     if (!VALID_STATUSES.includes(status)) {
         return { success: false, error: "Trang thai khong hop le" };
     }
 
     try {
+        await requireAuth();
+
         const gift = await prisma.gift.update({
             where: { id },
             data: { status }
@@ -161,15 +167,18 @@ export async function updateGiftStatus(id: string, status: "wishing" | "bought")
         revalidatePath("/admin");
         return { success: true, gift };
     } catch (error) {
+        if (error instanceof Error && error.message === "Unauthorized") {
+            return { success: false, error: "Bạn cần đăng nhập lại để thực hiện tác vụ này!" };
+        }
         console.error("Error updating gift status:", error);
         return { success: false, error: "Failed to update gift status" };
     }
 }
 
 export async function deleteGift(id: string) {
-    await requireAuth();
-
     try {
+        await requireAuth();
+
         const existing = await prisma.gift.findUnique({ where: { id }, select: { imageUrl: true } });
 
         await prisma.gift.delete({ where: { id } });
@@ -182,15 +191,18 @@ export async function deleteGift(id: string) {
         revalidatePath("/admin");
         return { success: true };
     } catch (error) {
+        if (error instanceof Error && error.message === "Unauthorized") {
+            return { success: false, error: "Bạn cần đăng nhập lại để thực hiện tác vụ này!" };
+        }
         console.error("Error deleting gift:", error);
         return { success: false, error: "Failed to delete gift" };
     }
 }
 
 export async function getAdminStats() {
-    await requireAuth();
-
     try {
+        await requireAuth();
+
         const [totalWishes, totalBought, totalPrice] = await Promise.all([
             prisma.gift.count({ where: { status: "wishing" } }),
             prisma.gift.count({ where: { status: "bought" } }),
@@ -210,6 +222,9 @@ export async function getAdminStats() {
             }
         };
     } catch (error) {
+        if (error instanceof Error && error.message === "Unauthorized") {
+            return { success: false, error: "Bạn cần đăng nhập lại để xem thống kê!" };
+        }
         console.error("Error getting stats:", error);
         return { success: false, error: "Failed to get stats" };
     }
