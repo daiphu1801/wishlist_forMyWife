@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { revalidatePath, unstable_cache } from "next/cache";
+import { revalidatePath, unstable_cache, revalidateTag } from "next/cache";
 import { requireAuth } from "@/lib/session";
 import { deleteFromCloudinary } from "@/lib/cloudinary";
 
@@ -63,6 +63,7 @@ export async function createGift(data: {
         });
         revalidatePath("/");
         revalidatePath("/admin");
+        revalidateTag("gifts-list");
         return { success: true, gift };
     } catch (error) {
         if (error instanceof Error && error.message === "Unauthorized") {
@@ -141,6 +142,7 @@ export async function updateGift(id: string, data: {
         revalidatePath("/admin");
         revalidatePath(`/gift/${id}`);
         revalidatePath(`/edit/${id}`);
+        revalidateTag("gifts-list");
         return { success: true, gift };
     } catch (error) {
         if (error instanceof Error && error.message === "Unauthorized") {
@@ -165,6 +167,7 @@ export async function updateGiftStatus(id: string, status: "wishing" | "bought")
         });
         revalidatePath("/");
         revalidatePath("/admin");
+        revalidateTag("gifts-list");
         return { success: true, gift };
     } catch (error) {
         if (error instanceof Error && error.message === "Unauthorized") {
@@ -189,6 +192,7 @@ export async function deleteGift(id: string) {
 
         revalidatePath("/");
         revalidatePath("/admin");
+        revalidateTag("gifts-list");
         return { success: true };
     } catch (error) {
         if (error instanceof Error && error.message === "Unauthorized") {
